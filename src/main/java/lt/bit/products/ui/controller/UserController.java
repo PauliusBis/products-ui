@@ -1,46 +1,50 @@
 package lt.bit.products.ui.controller;
 
+import java.util.Locale;
+import javax.servlet.http.HttpServletRequest;
 import lt.bit.products.ui.service.UserService;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.servlet.http.HttpServletRequest;
-
 @Controller
 class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
+  private final MessageSource messages;
 
-    UserController(UserService userService) {
-        this.userService = userService;
-    }
+  UserController(UserService userService, MessageSource messages) {
+    this.userService = userService;
+    this.messages = messages;
+  }
 
-    @GetMapping("/auth/login")
-    String loginForm() {
-        if (userService.isAuthenticated()) {
-            return "redirect:/products";
-        }
-        return "login";
+  @GetMapping("/auth/login")
+  String loginForm() {
+    if (userService.isAuthenticated()) {
+      return "redirect:/";
     }
+    return "login";
+  }
 
-    @PostMapping("/auth/login")
-    String login(HttpServletRequest request, Model model) {
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        if (username.equals("admin") && password.equals("admin1")) {
-            userService.setAuthenticated(true);
-            return "redirect:/products";
-        }
-        model.addAttribute("errorMsg", "Invalid username or password");
-        return "login";
-    }
+  @PostMapping("/auth/login")
+  String login(HttpServletRequest request, Model model) {
+    String username = request.getParameter("username");
+    String password = request.getParameter("password");
+    userService.login(username, password);
 
-    @GetMapping("/auth/logout")
-    String logout() {
-        userService.setAuthenticated(false);
-        return "login";
+    if (userService.isAuthenticated()) {
+      return "redirect:/";
     }
+    model.addAttribute("errorMsg",
+        messages.getMessage("login.error.INVALID_CREDENTIALS", null, Locale.getDefault()));
+    return "login";
+  }
+
+  @GetMapping("/auth/logout")
+  String logout() {
+    userService.logout();
+    return "login";
+  }
 }
-
