@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductValidator {
 
   private static final Set<String> SUPPORTED_FILE_TYPES = Set.of("image/jpeg", "image/png");
-  private static final long MAX_FILE_SIZE = 10 * 1024;
+  private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   public void validate(Product product) throws ValidationException {
     validateName(product.getName());
@@ -46,7 +46,21 @@ public class ProductValidator {
 
   private void validateFileSize(long size) throws ValidationException {
     if (MAX_FILE_SIZE <= size) {
-      throw new ValidationException(ErrorCode.FILE_TOO_LARGE, MAX_FILE_SIZE);
+      throw new ValidationException(ErrorCode.FILE_TOO_LARGE, formattedFileSize(MAX_FILE_SIZE));
     }
+  }
+
+  private String formattedFileSize(long sizeInBytes) {
+    int divider = 1024;
+    long sizeInKb = sizeInBytes / divider;
+    if (sizeInKb == 0) {
+      return sizeInBytes + "B";
+    }
+
+    long sizeInMb = sizeInKb / divider;
+    if (sizeInMb == 0) {
+      return sizeInKb + "Kb";
+    }
+    return sizeInMb + "Mb";
   }
 }
