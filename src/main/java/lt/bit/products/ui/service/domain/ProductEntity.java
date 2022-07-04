@@ -29,6 +29,7 @@ public class ProductEntity implements Serializable {
   )
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
+  private String externalId;
 
   @Column(name = "name")
   private String name;
@@ -36,6 +37,9 @@ public class ProductEntity implements Serializable {
   private BigDecimal price;
   private double quantity;
   private String description;
+  private String imageName;
+  private String imageContentType;
+  private byte[] imageFileContents;
   private UUID supplierId;
 
   public UUID getId() {
@@ -44,6 +48,15 @@ public class ProductEntity implements Serializable {
 
   public void setId(UUID id) {
     this.id = id;
+  }
+
+  public String getExternalId() {
+    return externalId;
+  }
+
+  public ProductEntity setExternalId(String externalId) {
+    this.externalId = externalId;
+    return this;
   }
 
   public String getName() {
@@ -76,6 +89,30 @@ public class ProductEntity implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getImageName() {
+    return imageName;
+  }
+
+  public void setImageName(String imageName) {
+    this.imageName = imageName;
+  }
+
+  public String getImageContentType() {
+    return imageContentType;
+  }
+
+  public void setImageContentType(String imageContentType) {
+    this.imageContentType = imageContentType;
+  }
+
+  public byte[] getImageFileContents() {
+    return imageFileContents;
+  }
+
+  public void setImageFileContents(byte[] imageFileContents) {
+    this.imageFileContents = imageFileContents;
   }
 
   public UUID getSupplierId() {
