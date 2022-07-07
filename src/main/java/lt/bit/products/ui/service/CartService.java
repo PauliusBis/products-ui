@@ -1,9 +1,12 @@
 package lt.bit.products.ui.service;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lt.bit.products.ui.model.CartItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,19 +20,35 @@ public class CartService {
   private static final Logger LOG = LoggerFactory.getLogger(CartService.class);
   private Map<UUID, CartItem> cartItems = new HashMap<>();
 
-  public void addToCart(UUID productId, String productName) {
+  public void addToCart(UUID productId, String productName, BigDecimal productPrice) {
     CartItem item;
     if (cartItems.containsKey(productId)) {
       item = cartItems.get(productId);
       item.setCount(item.getCount() + 1);
     } else {
-      item = new CartItem(productId, productName, 1);
+      item = new CartItem(productId, productName, productPrice, 1);
     }
     cartItems.put(productId, item);
     LOG.info("Cart: " + cartItems);
   }
 
   public List<CartItem> getCartItems() {
-    return List.of(new CartItem(UUID.randomUUID(), "test", 2));
+    return this.cartItems.values().stream()
+        .sorted(Comparator.comparing(CartItem::getProductName))
+        .collect(Collectors.toList());
+  }
+
+  public void removeFromCart(UUID productId) {
+    cartItems.remove(productId);
+  }
+
+  public int getTotalItems() {
+    return cartItems.values().stream().mapToInt(CartItem::getCount).sum();
+  }
+
+  public BigDecimal getCartAmount() {
+    return cartItems.values().stream()
+        .map(CartItem::getTotalPrice)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 }
