@@ -1,6 +1,8 @@
 package lt.bit.products.ui.service;
 
+import java.security.AccessControlException;
 import java.util.List;
+import java.util.Optional;
 import lt.bit.products.ui.model.User;
 import lt.bit.products.ui.service.domain.UserEntity;
 import lt.bit.products.ui.service.domain.UserRepository;
@@ -8,9 +10,11 @@ import lt.bit.products.ui.service.domain.UserRole;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Service
+@Transactional
 @SessionAttributes({"authenticated", "admin", "userId", "userName"})
 public class UserService {
 
@@ -28,13 +32,20 @@ public class UserService {
   }
 
   public void login(String username, String password) {
-    if (repository.existsByUsernameAndPasswordAndRole(username, password, UserRole.ADMIN)) {
+    Optional<UserEntity> user = repository.findByUsernameAndPassword(username, password);
+    user.ifPresent(u -> {
       setAuthenticated(true);
-    }
+      setAdmin(u.getRole() == UserRole.ADMIN);
+      setUserId(u.getId());
+      setUserName(u.getUsername());
+    });
   }
 
   public void logout() {
     setAuthenticated(false);
+    setAdmin(false);
+    setUserId(null);
+    setUserName(null);
   }
 
   public boolean isAuthenticated() {
@@ -74,5 +85,21 @@ public class UserService {
     // @formatter:off
     return mapper.map(users, new TypeToken<List<User>>() {}.getType());
     // @formatter:on
+  }
+
+  public User getUser(Integer id) {
+    return repository.findById(id).map(u -> mapper.map(u, User.class)).orElseThrow();
+  }
+
+  public void saveUser(User user) {
+    repository.save(mapper.map(user, UserEntity.class));
+  }
+
+  public void deleteUser(Integer id) {
+    Optional<UserEntity> user = repository.findById(id);
+    if (user.filter(u -> u.getRole() == UserRole.ADMIN).isPresent()) {
+      throw new AccessControlException("permission.error.ADMIN_USER_DELETION");
+    }
+    repository.deleteById(id);
   }
 }
