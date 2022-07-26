@@ -1,8 +1,15 @@
 package lt.bit.products.ui.service.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Entity
@@ -17,6 +24,13 @@ public class OrderEntity {
   private String customerPhone;
   private Integer userId;
   private BigDecimal totalAmount;
+
+  @Enumerated(EnumType.STRING)
+  private OrderStatus status;
+
+  @ElementCollection
+  @CollectionTable(name = "order_items", joinColumns = @JoinColumn(name = "order_id"))
+  private List<OrderItem> items = new ArrayList<>();
 
   public String getId() {
     return id;
@@ -72,5 +86,21 @@ public class OrderEntity {
 
   public void setTotalAmount(BigDecimal totalAmount) {
     this.totalAmount = totalAmount;
+  }
+
+  public OrderStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(OrderStatus status) {
+    this.status = status;
+  }
+
+  public List<OrderItem> getItems() {
+    return items;
+  }
+
+  public void setItems(List<OrderItem> items) {
+    this.items = items;
   }
 }
