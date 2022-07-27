@@ -16,6 +16,9 @@
         $('#cartCounter').text(data);
         $.get('/cart/amount', function (amount) {
           $('#cartAmount').text(amount);
+          if (!amount) {
+            $('#li_checkout').hide();
+          }
         });
       }
     });
@@ -83,6 +86,8 @@
   });
 </script>
 <div class="container">
+  <div th:replace="fragments/user_navbar.html :: navbarParams(authenticated=${authenticated}, currentUsername=${currentUsername})"></div>
+  <br>
   <div class="row">
     <button id="cartBtn" type="button" class="btn btn-outline-danger mb-3">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart"
@@ -111,8 +116,10 @@
           </a>
         </li>
       </th:block>
+      <li id="li_checkout" style="list-style-type: none; margin-top: 3px"><a th:if="${cartItems.size() > 0}" href="/cart/checkout"><button type="button" class="btn btn-info" style="color: whitesmoke">Checkout</button></a></li>
     </ul>
   </div>
+  <div th:if="${successMsg}" class="row"><span style="color: darkgreen" th:text="${successMsg}"></span></div>
   <div class="row">
     <div class="col" th:each="item : ${products}">
       <b><span th:text="${item.name}"></span></b><br>
